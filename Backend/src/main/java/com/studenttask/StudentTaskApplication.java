@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 public class StudentTaskApplication {
 
     public static void main(String[] args) {
+
         SpringApplication.run(StudentTaskApplication.class, args);
     }
 }

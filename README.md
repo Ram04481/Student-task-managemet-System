@@ -1,30 +1,40 @@
 # Student Task Management System
 
-A full-stack student task management application built using Spring Boot, React and MySQL.
+A full-stack student task management application built using Spring Boot, React, TypeScript, and MySQL.
 
 ## Features
 
-### Currently Implemented (Backend)
-- User entity with JPA/Hibernate mapping
-- User repository with Spring Data JPA
-- Health check endpoint (`GET /api/health`)
-- Basic Spring Security configuration (stateless, CSRF disabled)
-- MySQL database configuration via environment variables
-- JWT dependencies configured (implementation in progress)
-
-### Currently Implemented (Frontend)
-- React 18 + Vite project scaffold
-- Basic project structure ready for development
-
-### Planned Features (Under Development)
-- User registration
-- User login
-- JWT authentication
-- Student dashboard
+### Backend (Implemented & Verified)
+- User registration with BCrypt password hashing
+- User login with JWT authentication
+- Current user profile endpoint
+- JWT token generation, validation, and expiration handling
+- Stateless session management with Spring Security
 - Task CRUD operations (create, read, update, delete)
-- Task priority, status, due dates
-- Search and filter tasks
-- REST API endpoints for tasks
+- Task status (PENDING, IN_PROGRESS, COMPLETED)
+- Task priority (LOW, MEDIUM, HIGH)
+- Task due dates
+- Dashboard with task statistics (total, pending, in-progress, completed)
+- Ownership enforcement - users can only access their own tasks
+- Global exception handling with consistent error responses
+- CORS configured for frontend origin
+- MySQL persistence with Hibernate/JPA
+
+### Frontend (Implemented & Verified)
+- React 19 + TypeScript + Vite
+- User registration page with validation
+- User login page with validation
+- Protected routes with authentication context
+- Dashboard with summary cards
+- Task list with status/priority badges
+- Create task form
+- Edit task form
+- View task details
+- Delete task with confirmation
+- Profile page with logout
+- Axios client with JWT interceptor
+- Automatic token refresh on page load
+- Responsive design with Tailwind CSS
 
 ## Technology Stack
 
@@ -32,25 +42,26 @@ A full-stack student task management application built using Spring Boot, React 
 - Java 17
 - Spring Boot 3.2.2
 - Spring Web
-- Spring Data JPA
+- Spring Data JPA / Hibernate
 - Spring Security
-- JWT (io.jsonwebtoken:jjwt-api/impl/jackson)
+- JWT (io.jsonwebtoken:jjwt-api/impl/jackson 0.12.3)
 - MySQL (mysql-connector-j)
 - Maven
 - Lombok
+- H2 Database (for testing)
 
 ### Frontend
-- React 18
-- Vite 6
-- JavaScript (ES6+)
+- React 19
+- TypeScript
+- Vite 8
+- React Router 7
+- Axios
+- Tailwind CSS (via CDN)
+- oxlint
 
 ### Database
-- MySQL 8.0+
-
-### Tools
-- Git
-- GitHub
-- Postman (for API testing)
+- MySQL 8.0+ (production)
+- H2 (testing)
 
 ## Project Structure
 
@@ -65,36 +76,93 @@ Student Task Management System/
 │   │   │   │       └── studenttask/
 │   │   │   │           ├── StudentTaskApplication.java
 │   │   │   │           ├── config/
+│   │   │   │           │   ├── JwtConfig.java
 │   │   │   │           │   └── SecurityConfig.java
 │   │   │   │           ├── controller/
-│   │   │   │           │   └── HealthController.java
+│   │   │   │           │   ├── AuthController.java
+│   │   │   │           │   ├── HealthController.java
+│   │   │   │           │   └── TaskController.java
+│   │   │   │           ├── dto/
+│   │   │   │           │   ├── AuthResponse.java
+│   │   │   │           │   ├── DashboardResponse.java
+│   │   │   │           │   ├── LoginRequest.java
+│   │   │   │           │   ├── RegisterRequest.java
+│   │   │   │           │   ├── TaskRequest.java
+│   │   │   │           │   └── TaskResponse.java
 │   │   │   │           ├── entity/
+│   │   │   │           │   ├── Task.java
+│   │   │   │           │   ├── TaskPriority.java
+│   │   │   │           │   ├── TaskStatus.java
 │   │   │   │           │   └── User.java
+│   │   │   │           ├── exception/
+│   │   │   │           │   └── GlobalExceptionHandler.java
 │   │   │   │           ├── repository/
+│   │   │   │           │   ├── TaskRepository.java
 │   │   │   │           │   └── UserRepository.java
 │   │   │   │           ├── security/
-│   │   │   │           ├── service/
-│   │   │   │           ├── dto/
-│   │   │   │           └── exception/
+│   │   │   │           │   ├── CustomUserDetailsService.java
+│   │   │   │           │   ├── JwtAuthenticationFilter.java
+│   │   │   │           │   └── JwtService.java
+│   │   │   │           └── service/
+│   │   │   │               ├── AuthService.java
+│   │   │   │               └── TaskService.java
 │   │   │   └── resources/
 │   │   │       └── application.properties
 │   │   └── test/
+│   │       ├── java/
+│   │       │   └── com/studenttask/
+│   │       │       ├── config/
+│   │       │       │   └── TestSecurityConfig.java
+│   │       │       ├── repository/
+│   │       │       │   └── TaskRepositoryTest.java
+│   │       │       ├── security/
+│   │       │       │   ├── CustomUserDetailsServiceTest.java
+│   │       │       │   ├── JwtAuthenticationFilterTest.java
+│   │       │       │   └── JwtServiceTest.java
+│   │       │       └── service/
+│   │       │           ├── AuthServiceTest.java
+│   │       │           └── TaskServiceTest.java
+│   │       └── resources/
+│   │           ├── application-test.properties
+│   │           └── schema.sql
 │   ├── pom.xml
-│   └── target/ (ignored)
+│   └── .env (ignored)
 │
-├── Frontend/
-│   ├── public/
+├── frontend/
 │   ├── src/
+│   │   ├── api/
+│   │   │   └── client.ts
 │   │   ├── assets/
-│   │   ├── App.jsx
+│   │   ├── components/
+│   │   │   ├── Navbar.tsx
+│   │   │   ├── ProtectedRoute.tsx
+│   │   │   └── Sidebar.tsx
+│   │   ├── context/
+│   │   │   └── AuthContext.tsx
+│   │   ├── hooks/
+│   │   ├── pages/
+│   │   │   ├── AddTask.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── EditTask.tsx
+│   │   │   ├── Login.tsx
+│   │   │   ├── Profile.tsx
+│   │   │   ├── Register.tsx
+│   │   │   └── Tasks.tsx
+│   │   ├── types/
+│   │   │   └── index.ts
+│   │   ├── utils/
+│   │   ├── App.tsx
 │   │   ├── App.css
-│   │   ├── main.jsx
+│   │   ├── main.tsx
 │   │   └── index.css
-│   ├── index.html
+│   ├── public/
+│   ├── .env.example
 │   ├── package.json
+│   ├── package-lock.json
+│   ├── tsconfig.json
+│   ├── tsconfig.node.json
 │   ├── vite.config.js
-│   ├── node_modules/ (ignored)
-│   └── dist/ (ignored)
+│   └── index.html
 │
 ├── .gitignore
 ├── .env.example
@@ -137,14 +205,15 @@ Student Task Management System/
    jwt.expiration=${JWT_EXPIRATION}
    
    server.port=${SERVER_PORT}
+   cors.allowed-origins=${FRONTEND_URL}
    ```
 
 ### Build and Run
 
 ```bash
 cd Backend
-mvn clean install
-mvn spring-boot:run
+mvn clean test          # Run tests
+mvn spring-boot:run     # Start development server
 ```
 
 The backend will start on `http://localhost:8080`
@@ -170,7 +239,7 @@ Expected response:
 ### Install and Run
 
 ```bash
-cd Frontend
+cd frontend
 npm install
 npm run dev
 ```
@@ -180,7 +249,7 @@ The frontend will start on `http://localhost:5173`
 ### Build for Production
 
 ```bash
-cd Frontend
+cd frontend
 npm run build
 ```
 
@@ -200,6 +269,11 @@ The project uses environment variables for configuration. Copy `.env.example` to
 | `SERVER_PORT` | Backend server port | `8080` |
 | `FRONTEND_URL` | Frontend URL for CORS | `http://localhost:5173` |
 
+**Frontend (.env.example):**
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `VITE_API_BASE_URL` | Backend API base URL | `http://localhost:8080/api` |
+
 **⚠️ Never commit `.env` files or real secrets to version control!**
 
 ## API Endpoints
@@ -209,39 +283,129 @@ The project uses environment variables for configuration. Copy `.env.example` to
 |--------|----------|-------------|
 | GET | `/api/health` | Health check endpoint |
 
-### Authentication (Planned)
+### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/auth/register` | Register new user |
 | POST | `/api/auth/login` | Login user |
 | GET | `/api/auth/me` | Get current user profile |
 
-### Tasks (Planned)
+### Tasks
 | Method | Endpoint | Description |
 |--------|----------|-------------|
 | POST | `/api/tasks` | Create new task |
-| GET | `/api/tasks` | Get all tasks (with search/filter) |
+| GET | `/api/tasks` | Get all tasks for authenticated user |
 | GET | `/api/tasks/{id}` | Get task by ID |
 | PUT | `/api/tasks/{id}` | Update task |
 | DELETE | `/api/tasks/{id}` | Delete task |
-| PATCH | `/api/tasks/{id}/status` | Update task status |
+| GET | `/api/tasks/dashboard` | Get dashboard statistics |
 
-## Current Status
+### Request/Response Examples
 
-| Component | Status |
-|-----------|--------|
-| Backend - Project Structure | ✅ Complete |
-| Backend - User Entity & Repository | ✅ Complete |
-| Backend - Health Endpoint | ✅ Complete |
-| Backend - Spring Security Config (Basic) | ✅ Complete |
-| Backend - JWT Authentication | 🚧 In Progress |
-| Backend - Auth Controllers (Register/Login) | ⏳ Not Started |
-| Backend - Task Entity & Repository | ⏳ Not Started |
-| Backend - Task Controllers & Services | ⏳ Not Started |
-| Frontend - Project Scaffold | ✅ Complete |
-| Frontend - Pages & Components | ⏳ Not Started |
-| Frontend - API Integration | ⏳ Not Started |
-| Database - Schema Creation | ✅ Auto (Hibernate) |
+**Register Request:**
+```json
+{
+  "name": "John Doe",
+  "email": "john@example.com",
+  "password": "Password123"
+}
+```
+
+**Login Request:**
+```json
+{
+  "email": "john@example.com",
+  "password": "Password123"
+}
+```
+
+**Auth Response:**
+```json
+{
+  "token": "eyJhbGciOiJIUzUxMiJ9...",
+  "tokenType": "Bearer",
+  "user": {
+    "id": 1,
+    "name": "John Doe",
+    "email": "john@example.com"
+  }
+}
+```
+
+**Task Request:**
+```json
+{
+  "title": "Complete assignment",
+  "description": "Finish the Java project",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "dueDate": "2026-12-31T23:59:00"
+}
+```
+
+**Task Response:**
+```json
+{
+  "id": 1,
+  "title": "Complete assignment",
+  "description": "Finish the Java project",
+  "status": "PENDING",
+  "priority": "HIGH",
+  "dueDate": "2026-12-31T23:59:00",
+  "createdAt": "2026-10-10T10:00:00",
+  "updatedAt": "2026-10-10T10:00:00"
+}
+```
+
+**Dashboard Response:**
+```json
+{
+  "totalTasks": 10,
+  "pendingTasks": 4,
+  "inProgressTasks": 3,
+  "completedTasks": 3
+}
+```
+
+## Security
+
+- Passwords are hashed with BCrypt (strength 10)
+- JWT tokens signed with HS512 algorithm (256+ bit secret)
+- Stateless authentication - no server-side sessions
+- CORS restricted to configured frontend origin
+- Ownership enforced at service layer
+- No sensitive data in logs or API responses
+- All secrets via environment variables
+
+## Testing
+
+### Backend Tests
+```bash
+cd Backend
+mvn test
+```
+
+**Test Results:**
+```
+Tests run: 48, Failures: 0, Errors: 0, Skipped: 0
+BUILD SUCCESS
+```
+
+| Test Class | Tests |
+|------------|-------|
+| TaskRepositoryTest | 9 |
+| CustomUserDetailsServiceTest | 2 |
+| JwtAuthenticationFilterTest | 8 |
+| JwtServiceTest | 10 |
+| AuthServiceTest | 8 |
+| TaskServiceTest | 11 |
+
+### Frontend Checks
+```bash
+cd frontend
+npm run lint    # Linting (warnings only)
+npm run build   # Production build
+```
 
 ## Development
 
@@ -255,8 +419,9 @@ mvn test
 
 **Frontend:**
 ```bash
-cd Frontend
-npm test
+cd frontend
+npm run lint
+npm run build
 ```
 
 ### Building for Production
@@ -264,16 +429,57 @@ npm test
 **Backend:**
 ```bash
 cd Backend
-mvn clean package
+mvn clean package -DskipTests
 # JAR file will be in target/
 ```
 
 **Frontend:**
 ```bash
-cd Frontend
+cd frontend
 npm run build
 # Output in dist/
 ```
+
+## Current Status
+
+| Component | Status |
+|-----------|--------|
+| Backend - Project Structure | ✅ Complete |
+| Backend - User Entity & Repository | ✅ Complete |
+| Backend - Health Endpoint | ✅ Complete |
+| Backend - Spring Security Config | ✅ Complete |
+| Backend - JWT Authentication | ✅ Complete |
+| Backend - Auth Controllers | ✅ Complete |
+| Backend - Task Entity & Repository | ✅ Complete |
+| Backend - Task Controllers & Services | ✅ Complete |
+| Backend - Global Exception Handling | ✅ Complete |
+| Backend - Automated Tests (48 passing) | ✅ Complete |
+| Frontend - Project Scaffold | ✅ Complete |
+| Frontend - Pages & Components | ✅ Complete |
+| Frontend - API Integration | ✅ Complete |
+| Frontend - Authentication Flow | ✅ Complete |
+| Frontend - Task CRUD UI | ✅ Complete |
+| Database - Schema Creation | ✅ Complete |
+| End-to-End Verification | ✅ Complete |
+
+## Troubleshooting
+
+### Backend won't start - JWT Secret error
+Ensure `JWT_SECRET` in `.env` is at least 256 bits (32 characters) for HS512 algorithm.
+
+### Database connection failed
+- Verify MySQL is running
+- Check `DB_URL`, `DB_USERNAME`, `DB_PASSWORD` in `.env`
+- Ensure `student_task_db` database exists
+
+### CORS errors in frontend
+- Verify `FRONTEND_URL` in backend `.env` matches frontend URL
+- Check backend is running on port 8080
+- Check frontend is running on port 5173
+
+### Frontend build fails
+- Run `npm install` to ensure dependencies
+- Check Node.js version (18+ required)
 
 ## Contributing
 
